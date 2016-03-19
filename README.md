@@ -25,7 +25,7 @@ $("button").on("click", function(){
 });
 ```
 
-very **long**!!
+too **long**!!
 
 너무 길다
 
