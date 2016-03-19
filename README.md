@@ -63,7 +63,6 @@ jquery on 메서드와 사용방법이 동일합니다
 
 *폼(form)일 경우 해당 jquery dom이 아닌(not jquery dom), 자식(children) submit을 잠급니다(lock).
 
----
 ### config(설정, 옵션)
 
 #### global config
