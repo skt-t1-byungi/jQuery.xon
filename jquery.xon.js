@@ -91,7 +91,7 @@
 
 			if ( !ins.el ) {
 				//if submit -> ins.submit == ins.el
-				ins.setEl( elem );
+				ins.setEl( evt, elem );
 			}
 
 			//throttle
@@ -123,14 +123,14 @@
 	wrapFn.prototype = {
 		constructor : wrapFn,
 
-		setEl: function ( elem ) {
+		setEl: function ( evt, elem ) {
 
 			var submit, conf;
 
 			conf = this.config;
 			submit = elem.find(':submit');
 
-			if ( submit.length > 0 ) {
+			if ( evt.type === "submit" && submit.length > 0 ) {
 				this.el = this.submit = submit;
 			} else {
 				this.el = elem;
