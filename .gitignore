@@ -1,0 +1,4 @@
+.phpintel/*
+node_modules/*
+test/*
+web.config
