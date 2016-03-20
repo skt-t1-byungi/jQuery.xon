@@ -156,6 +156,7 @@ $("button").xon("click", ,function(){
 **"xon:~"** 으로 jQuery로 래핑된  $el을 통해 이벤트를 등록할 수 있습니다. 
 > 단 이 때에는 **xon이 아닌 on메소드를 사용**하십시요!!
 아래의 예가 잘못된 예입니다.
+
 #### incorrect usage
 ```js
 //incorrect
