@@ -142,6 +142,7 @@ event.data.xon에 추가적인 이벤트를 등록할수 있습니다. 트리거
 * complete : ajax요청이 모두 완료될 때.
 > $.xon() 헬퍼함수를 통해 전역적인 공통 이벤트를 등록할 수도 있습니다.
 > ex) $.xon( { onStart : function(){...} } );
+
 #### or
 ```js
 $("button").xon("click", ,function(){
