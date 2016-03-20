@@ -10,12 +10,15 @@
 	//Global Config
 	var Config = {
 		offAttr : "disabled",
+		onStart : $.noop,
+		onChange : $.noop,
+		onComplete : $.noop 
 	};
 
 	/**
 	 * Global Config API
 	 */
-	$.xon = function ( extend ) {		
+	$.xon = function( extend ) {		
 		if( extend ){
 			$.extend( Config, extend );
 		}
@@ -71,12 +74,20 @@
 		return Array.prototype.slice.call(args);
 	}
 
+	// http://phpjs.org/functions/ucfirst/
+	function ucfirst(str) {
+		var f;
+		str += '';
+		f = str.charAt(0).toUpperCase();
+		return f + str.substr(1);
+	}
+
 	/**
 	 * wrapper constructor
 	 * wrapFnConstructor, wrapFn, fn등 3개의 인스턴스가 존재함
 	 * fn이 사용자 등록 핸들러. wrapFn이 실제 이벤트 핸들러 객체라면 wrapFnConstructor은 wrapFn을 백그라운드 관리 객체
 	 */
-	var wrapFn = function ( elem, fn ) {
+	var wrapFn = function( elem, fn ) {
 
 		//event prepare scope
 		//this -> wrapFn instance
@@ -86,12 +97,13 @@
 
 		//default props
 		ins.isLock = false;
+		ins.elem = elem;
 		//ins.option = null;
 		//ins.el = null;
 		//ins.submit = null;
 
 		//real event handler
-		wrapped = function ( evt ) {
+		wrapped = function( evt ) {
 			var xhr;
 
 			//evnt trigger scope
@@ -103,7 +115,7 @@
 
 			if ( !ins.el ) {
 				//if submit -> ins.submit == ins.el
-				ins.setEl( evt, elem );
+				ins.setEl( evt );
 			}
 
 			//throttle
@@ -112,6 +124,8 @@
 			}
 
 			ins.lock();
+			ins.trigger( 'start', evt );
+
 			xhr = fn.call( this, evt );
 
 			if ( xhr && xhr.always ) {
@@ -121,10 +135,12 @@
 				}
 
 				xhr.always( function() {
+					ins.trigger( 'complete', evt );
 					ins.unlock();
 				} );
 
 			} else { 
+				ins.trigger( 'complete', evt );
 				ins.unlock();
 				return xhr;
 			}
@@ -141,12 +157,13 @@
 	wrapFn.prototype = {
 		constructor : wrapFn,
 
-		setEl: function ( evt, elem ) {
+		setEl: function( evt ) {
 
-			var submit, opt;
+			var elem, submit, opt;
 
+			elem = this.elem;
 			opt = this.option;
-			submit = elem.find(':submit');
+			submit = elem.find( ':submit' );
 
 			if ( evt.type === "submit" && submit.length > 0 ) {
 				this.el = this.submit = submit;
@@ -155,7 +172,7 @@
 			}
 		},
 
-		setOption: function ( evt ) {
+		setOption: function( evt ) {
 
 			if ( evt.data && evt.data.xon ) {
 				this.option = $.extend( {}, Config, evt.data.xon );
@@ -164,7 +181,7 @@
 			}
 		},
 
-		lock: function ( el ) {
+		lock: function() {
 			var opt;
 			opt = this.option;
 
@@ -176,7 +193,7 @@
 			}
 		},
 
-		unlock: function ( el ) {
+		unlock: function() {
 			var opt;
 			opt = this.option;
 
@@ -186,6 +203,21 @@
 			if ( this.submit && opt.offAttr !== "disabled" ) {
 				this.submit.prop( "disabled", false );
 			}
+		},
+
+		trigger: function( cbName, evt ) {
+			var opt, cb;
+
+			opt = this.option;
+			cb = opt[ 'on' + ucfirst( cbName ) ];
+
+			//registered callback trigger
+			opt.onChange.call( this.el, evt );
+			cb.call( this.el, evt );
+			
+			//jquery elem evt trigger
+			this.elem.trigger( 'xon:' + cbName );
+			this.elem.trigger( 'xon:change' );
 		}
 	};
 
