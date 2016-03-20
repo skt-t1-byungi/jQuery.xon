@@ -186,6 +186,7 @@ console.log($.xon());
 ### other
 **.xone(), .xoff()** 역시 jQuery .one, .off처럼 사용하면 됩니다 
 > **.xone(), .xoff()** same **.one(), .off()** method!
+
 ```js
 var evt = function(){...};
 $("button").xone("click", evt); //once trigger
