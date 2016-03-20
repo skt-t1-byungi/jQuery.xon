@@ -53,20 +53,6 @@ $("button").xon("click", function(){
 .xon을 jquery on메소드와 동일하게 사용하면 됩니다. ajax요청이 끝나기 전까지 자동으로 disabled속성이 적용되어집니다. 
 >same jQuery **.on()** method!
 
-### form submit
-```js
-$("form").xon("submit", function(){
-    return $.post('test.php', function(){
-        //work..
-        ...
-    });
-});
-```
-```css
-*[type=submit]:disabled{ opacity : 0.5; }
-```
-form submit 시에는 form이 아니라 폼 내부의 :submit타입에 lock이 걸리며 offAttr과 상관없이 disabled속성이 추가됩니다.
-
 ### enable default event
 ```js
 $("a").xon("click", function(event, enableDefaultEvent){
@@ -77,7 +63,7 @@ $("a").xon("click", function(event, enableDefaultEvent){
   })
 });
 ```
-.xon을 사용하면 기본이벤트가 비활성화됩니다. (**event.preventdefault()**) 
+.xon()을 사용하면 기본이벤트가 비활성화됩니다. (**event.preventdefault()**) 
 일반적으로 ajax 결과를 기다리는 경우, element의 기본이벤트가 이를 방해하기 때문입니다.
 그러나 두번째 인자함수를 통해 언제든 기본이벤트 비활성화를 취소할 수 있습니다.
 
@@ -110,6 +96,20 @@ var option = $.xon({
 ```
 $.xon 헬퍼함수를 통해 전역적(global)으로 옵션을 설정할 수 있습니다. 옵션 우선순위는 **event.data.xon > $.xon()** 순입니다. 
 > $.xon()은 전역옵션 전체를 리턴합니다.
+
+### form submit
+```js
+$("form").xon("submit", function(){
+    return $.post('test.php', function(){
+        //work..
+        ...
+    });
+});
+```
+```css
+*[type=submit]:disabled{ opacity : 0.5; }
+```
+form submit 시에는 form이 아니라 폼 내부의 :submit타입에 lock이 걸리며 offAttr과 상관없이 disabled속성이 추가됩니다.
 
 ### event bind
 ```js
