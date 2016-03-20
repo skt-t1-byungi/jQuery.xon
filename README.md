@@ -63,7 +63,7 @@ $("a").xon("click", function(event, enableDefaultEvent){
   })
 });
 ```
-.xon()을 사용하면 기본이벤트가 비활성화됩니다. (**event.preventdefault()**) 
+.xon()을 사용하면 기본이벤트가 비활성화됩니다. (automatically **event.preventdefault()**) 
 일반적으로 ajax 결과를 기다리는 경우, element의 기본이벤트가 이를 방해하기 때문입니다.
 그러나 두번째 인자함수를 통해 언제든 기본이벤트 비활성화를 취소할 수 있습니다.
 
