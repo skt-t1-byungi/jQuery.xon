@@ -104,7 +104,7 @@
 
 		//real event handler
 		wrapped = function( evt ) {
-			var xhr;
+			var xhr, preventDefault;
 
 			//evnt trigger scope
 			//this -> origial el, $(this) == elem
@@ -126,13 +126,21 @@
 			ins.lock();
 			ins.trigger( 'start', evt );
 
-			xhr = fn.call( this, evt );
+			//for preventDefault;
+			preventDefault = true;
+
+			xhr = fn.call( this, evt, function() {
+				preventDefault = false;
+			} );
+
+
+			//ajax와 관련있음으로 기본적으로 preventDefault 한다.
+			//그러나 사용자가 원할 경우 기본이벤트 실행할수 있도록 한다.
+			if ( preventDefault ) {
+				evt.preventDefault();
+			}
 
 			if ( xhr && xhr.always ) {
-
-				if( !evt.isDefaultPrevented() ){
-					evt.preventDefault();
-				}
 
 				xhr.always( function() {
 					ins.trigger( 'complete', evt );
