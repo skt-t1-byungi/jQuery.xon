@@ -10,6 +10,7 @@
 	//Global Config
 	var Config = {
 		offAttr : "disabled",
+		preventDefault : true,
 		onStart : $.noop,
 		onChange : $.noop,
 		onComplete : $.noop 
@@ -127,15 +128,14 @@
 			ins.trigger( 'start', evt );
 
 			//for preventDefault;
-			preventDefault = true;
+			preventDefault = ins.option.preventDefault;
 
 			xhr = fn.call( this, evt, function() {
 				preventDefault = false;
 			} );
 
-
 			//ajax와 관련있음으로 기본적으로 preventDefault 한다.
-			//그러나 사용자가 원할 경우 기본이벤트 실행할수 있도록 한다.
+			//그러나 사용자가 원할 경우 기본이벤트 실행할수 있도록 한다. (event handler 2번째 인자 실행)
 			if ( preventDefault ) {
 				evt.preventDefault();
 			}
