@@ -39,7 +39,7 @@
 		if(arr[ 0 ] && arr[ 0 ].handleObj){
 			
 			fn = arr[ 0 ].handleObj.handler;
-			arr[ 0 ].handleObj.handler = fn.xon;
+			arr[ 0 ].handleObj.handler = returnWrapFn( elem, fn );
 
 			return arr;
 		}
@@ -49,7 +49,7 @@
 
 			for ( type in arr[ 0 ] ) {
 				fn = arr[ 0 ][ type ];
-				arr[ 0 ][ type ] = fn.xon || new wrapFn( elem, fn );
+				arr[ 0 ][ type ] = returnWrapFn( elem, fn ) || new wrapFn( elem, fn );
 			}
 			return arr;
 		}
@@ -67,8 +67,31 @@
 			return arr;
 		}
 
-		arr[ idx ] = fn.xon || new wrapFn( elem, fn );
+		arr[ idx ] = returnWrapFn( elem, fn ) || new wrapFn( elem, fn );
 		return arr;
+	}
+
+	//return cached wrapFn at elem
+	function returnWrapFn( elem, fn ) {		
+		var wrapFn;
+
+		if ( fn.xon ) {
+			wrapFn = elem.data( fn.xon );
+		}
+		return wrapFn || false;
+	}
+
+	//store wrapFn
+	function storeWrapFn( elem, fn, wrapFn ) {
+		if ( !fn.xon ){
+			fn.xon = xuuid();
+		}
+
+		elem.data( fn.xon, wrapFn );
+	}
+
+	function xuuid() {
+		return 'xonEvents:' + Math.floor((1 + Math.random()) * 0x10000);
 	}
 
 	function toArray( args ) {
@@ -82,6 +105,7 @@
 		f = str.charAt(0).toUpperCase();
 		return f + str.substr(1);
 	}
+
 
 	/**
 	 * wrapper constructor
@@ -154,9 +178,8 @@
 			}
 		};
 
-		//insert wrapFn for xoff
-		//순환참조 일어나지 않을 것 같은뎅 모르겠다. 쉽게 간다.
-		fn.xon = wrapped;
+		//cached wrapFn for xoff
+		storeWrapFn( elem, fn, wrapped );
 
 		return wrapped;
 	};
