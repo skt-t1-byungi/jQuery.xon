@@ -7,6 +7,12 @@
 
 	'use strict';
 
+	var Expando,
+		FnUid;
+
+	Expando = 'Xon' + Date.now();
+	FnUid = 0;
+
 	//Global Config
 	var Config = {
 		offAttr : "disabled",
@@ -75,23 +81,20 @@
 	function returnWrapFn( elem, fn ) {		
 		var wrapFn;
 
-		if ( fn.xon ) {
-			wrapFn = elem.data( fn.xon );
+		if ( fn[ Expando ] ) {
+			wrapFn = elem.data( 'xonEvent' + fn[ Expando ] );
 		}
+
 		return wrapFn || false;
 	}
 
 	//store wrapFn
-	function storeWrapFn( elem, fn, wrapFn ) {
-		if ( !fn.xon ){
-			fn.xon = xuuid();
+	function storeWrapFn( elem, wrapFn, fn ) {
+		if ( !fn[ Expando ] ){
+			fn[ Expando ] = ( FnUid ++ ).toString();
 		}
 
-		elem.data( fn.xon, wrapFn );
-	}
-
-	function xuuid() {
-		return 'xonEvents:' + Math.floor((1 + Math.random()) * 0x10000);
+		elem.data( 'xonEvent' + fn[ Expando ], wrapFn );
 	}
 
 	function toArray( args ) {
@@ -179,7 +182,7 @@
 		};
 
 		//cached wrapFn for xoff
-		storeWrapFn( elem, fn, wrapped );
+		storeWrapFn( elem, wrapped, fn );
 
 		return wrapped;
 	};
