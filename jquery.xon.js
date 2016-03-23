@@ -1,273 +1,276 @@
 /*!
- * jQuery.xon.js 
+ * jQuery.xon.js
  * sertion@innorix.com
  * https://github.com/skt-t1-byungi/jQuery.xon
  */
-(function( win, doc, $ ){
+(function(win, doc, $) {
 
-	'use strict';
+    'use strict';
 
-	var Expando,
-		FnUid;
+    var Expando,
+        FnUid;
 
-	Expando = 'Xon' + Date.now();
-	FnUid = 0;
+    Expando = 'Xon' + Date.now();
+    FnUid = 0;
 
-	//Global Config
-	var Config = {
-		offAttr : "disabled",
-		preventDefault : true,
-		onStart : $.noop,
-		onChange : $.noop,
-		onComplete : $.noop 
-	};
+    //Global Config
+    var Config = {
+        offAttr: "disabled",
+        preventDefault: true,
+        onStart: $.noop,
+        onChange: $.noop,
+        onComplete: $.noop
+    };
 
-	/**
-	 * Global Config API
-	 */
-	$.xon = function( extend ) {		
-		if( extend ){
-			$.extend( Config, extend );
-		}
-		return Config;
-	};
+    /**
+     * Global Config API
+     */
+    $.xon = function(extend) {
+        if (extend) {
+            $.extend(Config, extend);
+        }
+        return Config;
+    };
 
-	/**
-	 * functions
-	 */
-	function repack( elem, args ) {
-		var arr, type, fn, idx;
+    /**
+     * functions
+     */
+    function repack(elem, args) {
+        var arr, type, fn, idx;
 
-		arr = toArray( args );
+        arr = toArray(args);
 
-		//triggered event object
-		//for xoff
-		if(arr[ 0 ] && arr[ 0 ].handleObj){
-			
-			fn = arr[ 0 ].handleObj.handler;
-			arr[ 0 ].handleObj.handler = returnWrapFn( elem, fn );
+        //triggered event object
+        //for xoff
+        if (arr[0] && arr[0].handleObj) {
 
-			return arr;
-		}
+            fn = arr[0].handleObj.handler;
+            arr[0].handleObj.handler = returnWrapFn(elem, fn);
 
-		//when object types
-		if ( typeof arr[ 0 ] === "object" ){
+            return arr;
+        }
 
-			for ( type in arr[ 0 ] ) {
-				fn = arr[ 0 ][ type ];
-				arr[ 0 ][ type ] = returnWrapFn( elem, fn ) || new wrapFn( elem, fn );
-			}
-			return arr;
-		}
+        //when object types
+        if (typeof arr[0] === "object") {
 
-		//find event handler
-		idx = arr.length;
-		while ( --idx >= 0 ) {
-			if ( typeof arr[ idx ] === "function" ) {
-				fn = arr[ idx ];
-				break;
-			}
-		}
+            for (type in arr[0]) {
+                fn = arr[0][type];
+                arr[0][type] = returnWrapFn(elem, fn) || new WrapFn(elem, fn);
+            }
+            return arr;
+        }
 
-		if ( !fn ) {
-			return arr;
-		}
+        //find event handler
+        idx = arr.length;
+        while (--idx >= 0) {
+            if (typeof arr[idx] === "function") {
+                fn = arr[idx];
+                break;
+            }
+        }
 
-		arr[ idx ] = returnWrapFn( elem, fn ) || new wrapFn( elem, fn );
-		return arr;
-	}
+        if (!fn) {
+            return arr;
+        }
 
-	//return cached wrapFn at elem
-	function returnWrapFn( elem, fn ) {		
-		var wrapFn;
+        arr[idx] = returnWrapFn(elem, fn) || new WrapFn(elem, fn);
+        return arr;
+    }
 
-		if ( fn[ Expando ] ) {
-			wrapFn = elem.data( 'xonEvent' + fn[ Expando ] );
-		}
+    //return cached wrapFn at elem
+    function returnWrapFn(elem, fn) {
+        var wrapFn;
 
-		return wrapFn || false;
-	}
+        if (fn[Expando]) {
+            wrapFn = elem.data('xonEvent' + fn[Expando]);
+        }
 
-	//store wrapFn
-	function storeWrapFn( elem, wrapFn, fn ) {
-		if ( !fn[ Expando ] ){
-			fn[ Expando ] = ( FnUid ++ ).toString();
-		}
+        return wrapFn || false;
+    }
 
-		elem.data( 'xonEvent' + fn[ Expando ], wrapFn );
-	}
+    //store wrapFn
+    function storeWrapFn(elem, wrapFn, fn) {
+        if (!fn[Expando]) {
+            fn[Expando] = (FnUid++).toString();
+        }
 
-	function toArray( args ) {
-		return Array.prototype.slice.call(args);
-	}
+        elem.data('xonEvent' + fn[Expando], wrapFn);
+    }
 
-	// http://phpjs.org/functions/ucfirst/
-	function ucfirst(str) {
-		var f;
-		str += '';
-		f = str.charAt(0).toUpperCase();
-		return f + str.substr(1);
-	}
+    function toArray(args) {
+        return Array.prototype.slice.call(args);
+    }
+
+    // http://phpjs.org/functions/ucfirst/
+    function ucfirst(str) {
+        var f;
+        str += '';
+        f = str.charAt(0).toUpperCase();
+        return f + str.substr(1);
+    }
 
 
-	/**
-	 * wrapper constructor
-	 * wrapFnConstructor, wrapFn, fn등 3개의 인스턴스가 존재함
-	 * fn이 사용자 등록 핸들러. wrapFn이 실제 이벤트 핸들러 객체라면 wrapFnConstructor은 wrapFn을 백그라운드 관리 객체
-	 */
-	var wrapFn = function( elem, fn ) {
+    /**
+     * wrapper constructor
+     * wrapFnConstructor, wrapFn, fn등 3개의 인스턴스가 존재함
+     * fn이 사용자 등록 핸들러. wrapFn이 실제 이벤트 핸들러 객체라면 wrapFnConstructor은 wrapFn을 백그라운드 관리 객체
+     */
+    var WrapFn = function(elem, fn) {
 
-		//event prepare scope
-		//this -> wrapFn instance
-		
-		var ins, wrapped;
-		ins = this;
+        //event prepare scope
+        //this -> wrapFn instance
 
-		//default props
-		ins.isLock = false;
-		ins.elem = elem;
-		//ins.option = null;
-		//ins.el = null;
-		//ins.submit = null;
+        var ins, wrapped;
+        ins = this;
 
-		//real event handler
-		wrapped = function( evt ) {
-			var xhr, preventDefault;
+        //default props
+        ins.isLock = false;
+        ins.elem = elem;
+        //ins.option = null;
+        //ins.el = null;
+        //ins.submit = null;
 
-			//evnt trigger scope
-			//this -> origial el, $(this) == elem
-			
-			if ( !ins.option ) {
-				ins.setOption( evt );
-			}
+        //real event handler
+        wrapped = function(evt) {
+            var xhr, preventDefault;
 
-			if ( !ins.el ) {
-				//if submit -> ins.submit == ins.el
-				ins.setEl( evt );
-			}
+            //evnt trigger scope
+            //this -> origial el, $(this) == elem
 
-			//throttle
-			if ( ins.isLock ) {
-				return ;
-			}
+            if (!ins.option) {
+                ins.setOption(evt);
+            }
 
-			ins.lock();
-			ins.trigger( 'start', evt );
+            if (!ins.el) {
+                //if submit -> ins.submit == ins.el
+                ins.setEl(evt);
+            }
 
-			//for preventDefault;
-			preventDefault = ins.option.preventDefault;
+            //throttle
+            if (ins.isLock) {
+                return;
+            }
 
-			xhr = fn.call( this, evt, function() {
-				preventDefault = false;
-			} );
+            ins.lock();
+            ins.trigger('start', evt);
 
-			//ajax와 관련있음으로 기본적으로 preventDefault 한다.
-			//그러나 사용자가 원할 경우 기본이벤트 실행할수 있도록 한다. (event handler 2번째 인자 실행)
-			if ( preventDefault ) {
-				evt.preventDefault();
-			}
+            //for preventDefault;
+            preventDefault = ins.option.preventDefault;
 
-			if ( xhr && xhr.always ) {
+            xhr = fn.call(this, evt, function() {
+                preventDefault = false;
+            });
 
-				xhr.always( function() {
-					ins.trigger( 'complete', evt );
-					ins.unlock();
-				} );
+            //ajax와 관련있음으로 기본적으로 preventDefault 한다.
+            //그러나 사용자가 원할 경우 기본이벤트 실행할수 있도록 한다. (event handler 2번째 인자 실행)
+            if (preventDefault) {
+                evt.preventDefault();
+            }
 
-			} else { 
-				ins.trigger( 'complete', evt );
-				ins.unlock();
-				return xhr;
-			}
-		};
+            if (xhr && xhr.always) {
 
-		//cached wrapFn for xoff
-		storeWrapFn( elem, wrapped, fn );
+                xhr.always(function() {
+                    ins.trigger('complete', evt);
+                    ins.unlock();
+                });
 
-		return wrapped;
-	};
+            }
+            else {
+                ins.trigger('complete', evt);
+                ins.unlock();
+                return xhr;
+            }
+        };
 
-	//method
-	wrapFn.prototype = {
-		constructor : wrapFn,
+        //cached wrapFn for xoff
+        storeWrapFn(elem, wrapped, fn);
 
-		setEl: function( evt ) {
+        return wrapped;
+    };
 
-			var elem, submit, opt;
+    //method
+    WrapFn.prototype = {
+        constructor: WrapFn,
 
-			elem = this.elem;
-			opt = this.option;
-			submit = elem.find( ':submit' );
+        setEl: function(evt) {
 
-			if ( evt.type === "submit" && submit.length > 0 ) {
-				this.el = this.submit = submit;
-			} else {
-				this.el = elem;
-			}
-		},
+            var elem, submit, opt;
 
-		setOption: function( evt ) {
+            elem = this.elem;
+            opt = this.option;
+            submit = elem.find(':submit');
 
-			if ( evt.data && evt.data.xon ) {
-				this.option = $.extend( {}, Config, evt.data.xon );
-			} else {
-				this.option = Config;
-			}
-		},
+            if (evt.type === "submit" && submit.length > 0) {
+                this.el = this.submit = submit;
+            }
+            else {
+                this.el = elem;
+            }
+        },
 
-		lock: function() {
-			var opt;
-			opt = this.option;
+        setOption: function(evt) {
 
-			this.isLock = true;
-			this.el.attr( opt.offAttr, "true" );
+            if (evt.data && evt.data.xon) {
+                this.option = $.extend({}, Config, evt.data.xon);
+            }
+            else {
+                this.option = Config;
+            }
+        },
 
-			if ( this.submit && opt.offAttr !== "disabled" ) {
-				this.submit.prop( "disabled", true );
-			}
-		},
+        lock: function() {
+            var opt;
+            opt = this.option;
 
-		unlock: function() {
-			var opt;
-			opt = this.option;
+            this.isLock = true;
+            this.el.attr(opt.offAttr, "true");
 
-			this.isLock = false;
-			this.el.removeAttr( opt.offAttr );
+            if (this.submit && opt.offAttr !== "disabled") {
+                this.submit.prop("disabled", true);
+            }
+        },
 
-			if ( this.submit && opt.offAttr !== "disabled" ) {
-				this.submit.prop( "disabled", false );
-			}
-		},
+        unlock: function() {
+            var opt;
+            opt = this.option;
 
-		trigger: function( cbName, evt ) {
-			var opt, cb;
+            this.isLock = false;
+            this.el.removeAttr(opt.offAttr);
 
-			opt = this.option;
-			cb = opt[ 'on' + ucfirst( cbName ) ];
+            if (this.submit && opt.offAttr !== "disabled") {
+                this.submit.prop("disabled", false);
+            }
+        },
 
-			//registered callback trigger
-			opt.onChange.call( this.el, evt );
-			cb.call( this.el, evt );
-			
-			//jquery elem evt trigger
-			this.elem.trigger( 'xon:' + cbName );
-			this.elem.trigger( 'xon:change' );
-		}
-	};
+        trigger: function(cbName, evt) {
+            var opt, cb;
 
-	/**
-	 * API
-	 */
-	var Xon = $.fn.xon = function() {
-		return this.on.apply( this, repack( this, arguments ) );
-	};
+            opt = this.option;
+            cb = opt['on' + ucfirst(cbName)];
 
-	var Xone = $.fn.xone = function() {
-		return this.one.apply( this, repack( this, arguments ) );
-	};	
+            //registered callback trigger
+            opt.onChange.call(this.el, evt);
+            cb.call(this.el, evt);
 
-	var Xoff = $.fn.xoff = function() {
-		return this.off.apply( this, repack( this, arguments ) );
-	};
+            //jquery elem evt trigger
+            this.elem.trigger('xon:' + cbName);
+            this.elem.trigger('xon:change');
+        }
+    };
 
-})( window, document, jQuery );
+    /**
+     * API
+     */
+    var Xon = $.fn.xon = function() {
+        return this.on.apply(this, repack(this, arguments));
+    };
+
+    var Xone = $.fn.xone = function() {
+        return this.one.apply(this, repack(this, arguments));
+    };
+
+    var Xoff = $.fn.xoff = function() {
+        return this.off.apply(this, repack(this, arguments));
+    };
+
+})(window, document, jQuery);
