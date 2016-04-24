@@ -251,7 +251,7 @@
             var opt;
 
             //불필요한 unlock task pass
-            if (!ins.isLock) {
+            if (!this.isLock) {
                 return;
             }
 
