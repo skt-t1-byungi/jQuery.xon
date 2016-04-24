@@ -19,7 +19,14 @@
         preventDefault: true,
         onStart: $.noop,
         onChange: $.noop,
-        onComplete: $.noop
+        onComplete: $.noop,
+
+        /**
+         * not used "disabled". privous ajax cancel.
+         * 이전요청을 취소함으로 ajax 중복을 막는다.
+         */
+        abortResolve : false,
+        onAbort: $.noop
     };
 
     /**
@@ -126,6 +133,7 @@
         //default props
         ins.isLock = false;
         ins.elem = elem;
+        //ins.xhr = null;
         //ins.option = null;
         //ins.el = null;
         //ins.submit = null;
@@ -147,11 +155,18 @@
             }
 
             //throttle
-            if (ins.isLock) {
+            if( ins.option.abortResolve ){
+                //abort resolve
+                ins.abort();
+                ins.trigger('abort', evt);
+            }
+            else if (ins.isLock) {
                 return;
             }
+            else {
+                ins.lock();
+            }
 
-            ins.lock();
             ins.trigger('start', evt);
 
             //for preventDefault;
@@ -174,6 +189,8 @@
                     ins.unlock();
                 });
 
+                //store for abortResolve
+                ins.xhr = xhr;
             }
             else {
                 ins.trigger('complete', evt);
@@ -232,6 +249,12 @@
 
         unlock: function() {
             var opt;
+
+            //불필요한 unlock task pass
+            if (!ins.isLock) {
+                return;
+            }
+
             opt = this.option;
 
             this.isLock = false;
@@ -255,6 +278,13 @@
             //jquery elem evt trigger
             this.elem.trigger('xon:' + cbName);
             this.elem.trigger('xon:change');
+        },
+
+        abort: function() {
+            if( this.xhr && this.xhr.abort ){
+                this.xhr.abort();
+                this.xhr = null;
+            }
         }
     };
 
