@@ -180,8 +180,13 @@ console.log($.xon());
 		onStart : $.noop, //빈 함수입니다.
 		onChange : $.noop,
 		onComplete : $.noop 
+		onAbort : $.noop,
+		abortResolve : false //이전 ajax 요청을 취소하는 방법으로 중복 ajax를 막는다. not used offAttr
     }
 ```
+### Abort Resovle (04/24/16 added)
+abortResolve:true 로 설정하면 offAttr(disabled")을 사용하지 않고 새로운 요청에 대해서 막지 않습니다. 대신 이전 요청을 취소합니다.
+
 ### other
 **.xone(), .xoff()** 역시 jQuery .one, .off처럼 사용하면 됩니다 
 > **.xone(), .xoff()** same **.one(), .off()** method!
